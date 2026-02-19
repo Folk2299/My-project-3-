@@ -787,6 +787,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Plane
       objectReference: {fileID: 0}
+    - target: {fileID: 3682397084030769466, guid: 629f0954cf86ad141a1f7ad109513904, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.6787288
+      objectReference: {fileID: 0}
+    - target: {fileID: 3682397084030769466, guid: 629f0954cf86ad141a1f7ad109513904, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.777
+      objectReference: {fileID: 0}
     - target: {fileID: 7466809588566212139, guid: 629f0954cf86ad141a1f7ad109513904, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.90403
