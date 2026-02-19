@@ -1,18 +1,12 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
-// [เพิ่มจาก Lab 02]
-// ใช้สำหรับโหลด Scene ใหม่
 
 public class BallMove : MonoBehaviour
 {
-    public float speed = 5f;
+    public float moveForce = 25f;        // แรงผลักให้ลูกบอลกลิ้ง
+    public float maxSpeed = 8f;          // จำกัดความเร็วไม่ให้พุ่งเกิน
     public float sprintMultiplier = 1.8f;
     public float jumpForce = 5f;
-
-    public float fallOfMap = -20f;
-    // [เพิ่มจาก Lab 02]
-    // ค่าความสูงแกน Y ที่ถือว่า Player ตก Map
 
     Rigidbody rb;
 
@@ -26,21 +20,9 @@ public class BallMove : MonoBehaviour
 
     void Update()
     {
-        // ------------------------------
-        // ตรวจสอบการตก Map
-        // ------------------------------
-        if (transform.position.y < fallOfMap)
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            // [เพิ่มจาก Lab 02]
-            // โหลด Scene ปัจจุบันใหม่
-        }
-
-        // อ่านคำสั่งกระโดด
+        // อ่าน Space ใน Update กันพลาด
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
-        {
             jumpQueued = true;
-        }
     }
 
     void FixedUpdate()
@@ -52,16 +34,24 @@ public class BallMove : MonoBehaviour
         if (Keyboard.current.wKey.isPressed) dir.y += 1;
         if (Keyboard.current.sKey.isPressed) dir.y -= 1;
 
-        float currentSpeed = speed;
+        float currentForce = moveForce;
         if (Keyboard.current.leftShiftKey.isPressed)
-            currentSpeed *= sprintMultiplier;
+            currentForce *= sprintMultiplier;
 
-        Vector3 move = new Vector3(dir.x, 0f, dir.y).normalized;
+        Vector3 moveDir = new Vector3(dir.x, 0f, dir.y).normalized;
 
-        rb.MovePosition(
-            rb.position + move * currentSpeed * Time.fixedDeltaTime
-        );
+        // 1) ใช้แรงผลัก → ลูกบอลจะกลิ้งจริง
+        rb.AddForce(moveDir * currentForce, ForceMode.Force);
 
+        // 2) จำกัดความเร็วแนวราบ (กันไหลเร็วเกิน)
+        Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        if (flatVel.magnitude > maxSpeed)
+        {
+            Vector3 limited = flatVel.normalized * maxSpeed;
+            rb.linearVelocity = new Vector3(limited.x, rb.linearVelocity.y, limited.z);
+        }
+
+        // 3) กระโดด
         if (jumpQueued && isGrounded)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
